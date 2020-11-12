@@ -31,7 +31,7 @@ if($PASSWORD) {
 			$_SESSION['_sfm_allowed'] = true;
 			header('Location: ?');
 		}
-		echo '<html><body><form action=? method=post>PASSWORD:<input type=password name=p autofocus/></form></body></html>';
+		echo '<html><body><form action=? method=post>Пароль:<input type=password name=p autofocus/></form></body></html>';
 		exit;
 	}
 }
@@ -44,13 +44,13 @@ if(DIRECTORY_SEPARATOR==='\\') $tmp_dir = str_replace('/',DIRECTORY_SEPARATOR,$t
 $tmp = get_absolute_path($tmp_dir . '/' .$_REQUEST['file']);
 
 if($tmp === false)
-	err(404,'File or Directory Not Found');
+	err(404,'Не найдено');
 if(substr($tmp, 0,strlen($tmp_dir)) !== $tmp_dir)
-	err(403,"Forbidden");
+	err(403,"Доступ запрещен");
 if(strpos($_REQUEST['file'], DIRECTORY_SEPARATOR) === 0)
-	err(403,"Forbidden");
+	err(403,"Доступ запрещен");
 if(preg_match('@^.+://@',$_REQUEST['file'])) {
-	err(403,"Forbidden");
+	err(403,"Доступ запрещен");
 }
 
 
@@ -58,7 +58,7 @@ if(!$_COOKIE['_sfm_xsrf'])
 	setcookie('_sfm_xsrf',bin2hex(openssl_random_pseudo_bytes(16)));
 if($_POST) {
 	if($_COOKIE['_sfm_xsrf'] !== $_POST['xsrf'] || !$_POST['xsrf'])
-		err(403,"XSRF Failure");
+		err(403,"Ошибка XSRF");
 }
 
 $file = $_REQUEST['file'] ?: '.';
@@ -111,14 +111,14 @@ if($_GET['do'] == 'list') {
 } elseif ($_POST['do'] == 'upload' && $allow_upload) {
 	foreach($disallowed_patterns as $pattern)
 		if(fnmatch($pattern, $_FILES['file_data']['name']))
-			err(403,"Files of this type are not allowed.");
+			err(403,"Файлы такого типа не разрешены.");
 
 	$res = move_uploaded_file($_FILES['file_data']['tmp_name'], $file.'/'.$_FILES['file_data']['name']);
 	exit;
 } elseif ($_GET['do'] == 'download') {
 	foreach($disallowed_patterns as $pattern)
 		if(fnmatch($pattern, $file))
-			err(403,"Files of this type are not allowed.");
+			err(403,"Файлы такого типа не разрешены.");
 
 	$filename = basename($file);
 	$finfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -386,8 +386,8 @@ $(function(){
 	function renderFileSizeErrorRow(file,folder) {
 		return $row = $('<div class="error" />')
 			.append( $('<span class="fileuploadname" />').text( 'Error: ' + (folder ? folder+'/':'')+file.name))
-			.append( $('<span/>').html(' file size - <b>' + formatFileSize(file.size) + '</b>'
-				+' exceeds max upload size of <b>' + formatFileSize(MAX_UPLOAD_SIZE) + '</b>')  );
+			.append( $('<span/>').html(' размер файла - <b>' + formatFileSize(file.size) + '</b>'
+				+' превышает допустимый <b>' + formatFileSize(MAX_UPLOAD_SIZE) + '</b>')  );
 	}
 <?php endif; ?>
 	function list() {
@@ -399,7 +399,7 @@ $(function(){
 				$.each(data.results,function(k,v){
 					$tbody.append(renderFileRow(v));
 				});
-				!data.results.length && $tbody.append('<tr><td class="empty" colspan=5>This folder is empty</td></tr>')
+				!data.results.length && $tbody.append('<tr><td class="empty" colspan=5>Здесь ничего нет</td></tr>')
 				data.is_writable ? $('body').removeClass('no_write') : $('body').addClass('no_write');
 			} else {
 				console.warn(data.error.msg);
@@ -432,7 +432,7 @@ $(function(){
 	}
 	function renderBreadcrumbs(path) {
 		var base = "",
-			$html = $('<div/>').append( $('<a href=#>Home</a></div>') );
+			$html = $('<div/>').append( $('<a href=#>Домой</a></div>') );
 		$.each(path.split('%2F'),function(k,v){
 			if(v) {
 				var v_as_text = decodeURIComponent(v);
@@ -444,14 +444,14 @@ $(function(){
 		return $html;
 	}
 	function formatTimestamp(unix_timestamp) {
-		var m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+		var m = ['ЯНВ', 'ФЕВ', 'МАР', 'АПР', 'МАЙ', 'ИЮН', 'ИЮЛ', 'АВГ', 'СЕН', 'ОКТ', 'НОЯ', 'ДЕК'];
 		var d = new Date(unix_timestamp*1000);
 		return [m[d.getMonth()],' ',d.getDate(),', ',d.getFullYear()," ",
 			(d.getHours() % 12 || 12),":",(d.getMinutes() < 10 ? '0' : '')+d.getMinutes(),
 			" ",d.getHours() >= 12 ? 'PM' : 'AM'].join('');
 	}
 	function formatFileSize(bytes) {
-		var s = ['bytes', 'KB','MB','GB','TB','PB','EB'];
+		var s = ['байт', 'КБ','МБ','ГБ','ТБ','ПБ','ЕБ'];
 		for(var pos = 0;bytes >= 1000; pos++,bytes /= 1024);
 		var d = Math.round(bytes*10);
 		return pos ? [parseInt(d/10),".",d%10," ",s[pos]].join('') : bytes + ' bytes';
@@ -463,8 +463,8 @@ $(function(){
 <div id="top">
    <?php if($allow_create_folder): ?>
 	<form action="?" method="post" id="mkdir" />
-		<label for=dirname>Create New Folder</label><input id=dirname type=text name=name value="" />
-		<input type="submit" value="create" />
+		<label for=dirname>Создать новую папку</label><input id=dirname type=text name=name value="" />
+		<input type="submit" value="Создать" />
 	</form>
 
    <?php endif; ?>
@@ -472,8 +472,8 @@ $(function(){
    <?php if($allow_upload): ?>
 
 	<div id="file_drop_target">
-		Drag Files Here To Upload
-		<b>or</b>
+		Перенесите файлы сюда
+		<b>или</b>
 		<input type="file" multiple />
 	</div>
    <?php endif; ?>
@@ -482,11 +482,11 @@ $(function(){
 
 <div id="upload_progress"></div>
 <table id="table"><thead><tr>
-	<th>Name</th>
-	<th>Size</th>
-	<th>Modified</th>
-	<th>Permissions</th>
-	<th>Actions</th>
+	<th>Имя</th>
+	<th>Размер</th>
+	<th>Дата изменения</th>
+	<th>Разрешения</th>
+	<th>Действия</th>
 </tr></thead><tbody id="list">
 
 </tbody></table>
