@@ -14,6 +14,7 @@ Just copy `index.php` to a folder on your webserver.
 - Works with Unicode file names
 - The interface is usable from an iPad
 - XSRF protection, and an optional password.
+- Поддержка русского языка @pnsrc
 
 ## Do not allow uploads on the public web
 
